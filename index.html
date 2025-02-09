@@ -321,6 +321,7 @@
         <button id="job-button" onclick="searchJob()">Search for Job</button>
         <button onclick="toggleShop('letter-shop')">Letter Shop</button>
         <button onclick="toggleShop('pet-shop')">Pet Shop</button>
+        <button onclick="study()" style="background-color: #9c27b0;">Study ($${Math.floor(petMemories[currentPet].intelligence * 0.5)})</button>
     </div>
 
     <div class="notification" id="notification"></div>
@@ -341,18 +342,138 @@
         const foodInput = document.getElementById('food');
         
         const premiumLetters = new Set(['q', 'x', 'z', 'j', 'v', 'w']);
-        const letterStats = {
-            'a': { intelligence: 2, happiness: 5 },
-            'e': { intelligence: 2, happiness: 5 },
-            'i': { intelligence: 2, happiness: 5 },
-            'o': { intelligence: 2, happiness: 5 },
-            'u': { intelligence: 2, happiness: 5 },
-            'q': { intelligence: 8, happiness: 15 },
-            'x': { intelligence: 10, happiness: 20 },
-            'z': { intelligence: 7, happiness: 12 },
-            'j': { intelligence: 6, happiness: 10 },
-            'v': { intelligence: 5, happiness: 8 },
-            'w': { intelligence: 6, happiness: 10 }
+        const petMemories = {
+            bear: { knownLetters: new Set(), intelligence: 10, experience: 0, currentJob: null },
+            robot: { knownLetters: new Set(), intelligence: 15, experience: 0, currentJob: null },
+            dragon: { knownLetters: new Set(), intelligence: 20, experience: 0, currentJob: null },
+            alien: { knownLetters: new Set(), intelligence: 25, experience: 0, currentJob: null }
+        };
+
+        const petLetterStats = {
+            bear: {
+                freeLetters: new Set(['a', 'e', 'i', 'o', 'u', 'b', 'c', 'd', 'f', 'g']),
+                prices: {
+                    'h': 5, 'k': 5, 'l': 5, 'm': 5, 'n': 5,
+                    'p': 10, 'r': 10, 's': 10, 't': 10,
+                    'q': 20, 'x': 20, 'z': 20, 'j': 20, 'v': 20, 'w': 20, 'y': 20
+                },
+                stats: {
+                    'a': { intelligence: 2, happiness: 5 },
+                    'e': { intelligence: 2, happiness: 5 },
+                    'i': { intelligence: 2, happiness: 5 },
+                    'o': { intelligence: 2, happiness: 5 },
+                    'u': { intelligence: 2, happiness: 5 },
+                    'q': { intelligence: 8, happiness: 15 },
+                    'x': { intelligence: 10, happiness: 20 },
+                    'z': { intelligence: 7, happiness: 12 },
+                    'j': { intelligence: 6, happiness: 10 },
+                    'v': { intelligence: 5, happiness: 8 },
+                    'w': { intelligence: 6, happiness: 10 }
+                }
+            },
+            robot: {
+                freeLetters: new Set(['b', 'c', 'd', 'f', 'g']),
+                prices: {
+                    'a': 10, 'e': 10, 'i': 10, 'o': 10, 'u': 10,
+                    'h': 15, 'k': 15, 'l': 15, 'm': 15, 'n': 15,
+                    'p': 20, 'r': 20, 's': 20, 't': 20,
+                    'q': 30, 'x': 30, 'z': 30, 'j': 30, 'v': 30, 'w': 30, 'y': 30
+                },
+                stats: {
+                    'b': { intelligence: 3, happiness: 4 },
+                    'c': { intelligence: 3, happiness: 4 },
+                    'd': { intelligence: 3, happiness: 4 },
+                    'f': { intelligence: 3, happiness: 4 },
+                    'g': { intelligence: 3, happiness: 4 },
+                    'h': { intelligence: 3, happiness: 4 },
+                    'k': { intelligence: 3, happiness: 4 },
+                    'l': { intelligence: 3, happiness: 4 },
+                    'm': { intelligence: 3, happiness: 4 },
+                    'n': { intelligence: 3, happiness: 4 },
+                    'p': { intelligence: 3, happiness: 4 },
+                    'r': { intelligence: 3, happiness: 4 },
+                    's': { intelligence: 3, happiness: 4 },
+                    't': { intelligence: 3, happiness: 4 },
+                    'q': { intelligence: 3, happiness: 4 },
+                    'x': { intelligence: 3, happiness: 4 },
+                    'z': { intelligence: 3, happiness: 4 },
+                    'j': { intelligence: 3, happiness: 4 },
+                    'v': { intelligence: 3, happiness: 4 },
+                    'w': { intelligence: 3, happiness: 4 },
+                    'y': { intelligence: 3, happiness: 4 }
+                }
+            },
+            dragon: {
+                freeLetters: new Set(['p', 'r', 's', 't']),
+                prices: {
+                    'a': 15, 'e': 15, 'i': 15, 'o': 15, 'u': 15,
+                    'b': 20, 'c': 20, 'd': 20, 'f': 20, 'g': 20,
+                    'h': 25, 'k': 25, 'l': 25, 'm': 25, 'n': 25,
+                    'q': 40, 'x': 40, 'z': 40, 'j': 40, 'v': 40, 'w': 40, 'y': 40
+                },
+                stats: {
+                    'p': { intelligence: 4, happiness: 3 },
+                    'r': { intelligence: 4, happiness: 3 },
+                    's': { intelligence: 4, happiness: 3 },
+                    't': { intelligence: 4, happiness: 3 },
+                    'a': { intelligence: 4, happiness: 3 },
+                    'e': { intelligence: 4, happiness: 3 },
+                    'i': { intelligence: 4, happiness: 3 },
+                    'o': { intelligence: 4, happiness: 3 },
+                    'u': { intelligence: 4, happiness: 3 },
+                    'b': { intelligence: 4, happiness: 3 },
+                    'c': { intelligence: 4, happiness: 3 },
+                    'd': { intelligence: 4, happiness: 3 },
+                    'f': { intelligence: 4, happiness: 3 },
+                    'g': { intelligence: 4, happiness: 3 },
+                    'h': { intelligence: 4, happiness: 3 },
+                    'k': { intelligence: 4, happiness: 3 },
+                    'l': { intelligence: 4, happiness: 3 },
+                    'm': { intelligence: 4, happiness: 3 },
+                    'n': { intelligence: 4, happiness: 3 },
+                    'q': { intelligence: 4, happiness: 3 },
+                    'x': { intelligence: 4, happiness: 3 },
+                    'z': { intelligence: 4, happiness: 3 },
+                    'j': { intelligence: 4, happiness: 3 },
+                    'v': { intelligence: 4, happiness: 3 },
+                    'w': { intelligence: 4, happiness: 3 },
+                    'y': { intelligence: 4, happiness: 3 }
+                }
+            },
+            alien: {
+                freeLetters: new Set(['x', 'z', 'q']),
+                prices: {
+                    'a': 20, 'e': 20, 'i': 20, 'o': 20, 'u': 20,
+                    'b': 25, 'c': 25, 'd': 25, 'f': 25, 'g': 25,
+                    'h': 30, 'k': 30, 'l': 30, 'm': 30, 'n': 30,
+                    'p': 35, 'r': 35, 's': 35, 't': 35,
+                    'j': 50, 'v': 50, 'w': 50, 'y': 50
+                },
+                stats: {
+                    'x': { intelligence: 5, happiness: 2 },
+                    'z': { intelligence: 5, happiness: 2 },
+                    'q': { intelligence: 5, happiness: 2 },
+                    'a': { intelligence: 5, happiness: 2 },
+                    'e': { intelligence: 5, happiness: 2 },
+                    'i': { intelligence: 5, happiness: 2 },
+                    'o': { intelligence: 5, happiness: 2 },
+                    'u': { intelligence: 5, happiness: 2 },
+                    'b': { intelligence: 5, happiness: 2 },
+                    'c': { intelligence: 5, happiness: 2 },
+                    'd': { intelligence: 5, happiness: 2 },
+                    'f': { intelligence: 5, happiness: 2 },
+                    'g': { intelligence: 5, happiness: 2 },
+                    'h': { intelligence: 5, happiness: 2 },
+                    'k': { intelligence: 5, happiness: 2 },
+                    'l': { intelligence: 5, happiness: 2 },
+                    'm': { intelligence: 5, happiness: 2 },
+                    'n': { intelligence: 5, happiness: 2 },
+                    'j': { intelligence: 5, happiness: 2 },
+                    'v': { intelligence: 5, happiness: 2 },
+                    'w': { intelligence: 5, happiness: 2 },
+                    'y': { intelligence: 5, happiness: 2 }
+                }
+            }
         };
 
         const jobs = [
@@ -360,7 +481,11 @@
             { title: "Word Assistant", minIntelligence: 40, income: 3 },
             { title: "Junior Editor", minIntelligence: 60, income: 5 },
             { title: "Senior Editor", minIntelligence: 80, income: 8 },
-            { title: "Chief Linguist", minIntelligence: 100, income: 12 }
+            { title: "Chief Linguist", minIntelligence: 100, income: 12 },
+            { title: "Word Scientist", minIntelligence: 150, income: 20 },
+            { title: "Language Master", minIntelligence: 200, income: 30 },
+            { title: "Lexicon Sage", minIntelligence: 300, income: 50 },
+            { title: "Alphabet God", minIntelligence: 500, income: 100 }
         ];
 
         const availablePets = {
@@ -414,30 +539,49 @@
             }, 3000);
         }
 
+        function study() {
+            const currentStats = petMemories[currentPet];
+            const studyCost = Math.floor(currentStats.intelligence * 0.5);
+            
+            if (money >= studyCost) {
+                money -= studyCost;
+                const intelligenceGain = Math.max(1, Math.floor(currentStats.intelligence * 0.1));
+                currentStats.intelligence += intelligenceGain;
+                currentStats.experience += 1;
+                showNotification(`Studied! +${intelligenceGain} Intelligence`, '#4CAF50');
+                updateStats();
+            } else {
+                showNotification(`Need $${studyCost} to study!`, '#e94560');
+            }
+        }
+
         function feedPet() {
             const letter = foodInput.value.toLowerCase().trim();
+            const currentStats = petMemories[currentPet];
+            const petStats = petLetterStats[currentPet];
 
             if (letter) {
-                if (premiumLetters.has(letter) && money < 10) {
-                    showNotification(`Letter "${letter}" costs $10! Check the Letter Shop`, '#e94560');
-                    foodInput.value = '';  // Clear input
+                const letterPrice = !petStats.freeLetters.has(letter) ? petStats.prices[letter] || 0 : 0;
+
+                if (letterPrice > 0 && money < letterPrice) {
+                    showNotification(`Letter "${letter}" costs $${letterPrice}! Check the Letter Shop`, '#e94560');
+                    foodInput.value = '';
                     return;
                 }
 
-                if (premiumLetters.has(letter)) {
-                    money -= 10;
+                if (letterPrice > 0) {
+                    money -= letterPrice;
                 }
 
-                if (!knownLetters.has(letter)) {
-                    knownLetters.add(letter);
-                    lettersEaten++;
+                if (!currentStats.knownLetters.has(letter)) {
+                    currentStats.knownLetters.add(letter);
                     
-                    if (letterStats[letter]) {
-                        intelligence += letterStats[letter].intelligence;
-                        happiness = Math.min(100, happiness + letterStats[letter].happiness);
-                        showNotification(`Learned "${letter}"! +${letterStats[letter].intelligence} Intelligence`);
+                    if (petStats.stats[letter]) {
+                        currentStats.intelligence += petStats.stats[letter].intelligence;
+                        happiness = Math.min(100, happiness + petStats.stats[letter].happiness);
+                        showNotification(`Learned "${letter}"! +${petStats.stats[letter].intelligence} Intelligence`);
                     } else {
-                        intelligence += 1;
+                        currentStats.intelligence += 1;
                         happiness = Math.min(100, happiness + 3);
                         showNotification(`Learned "${letter}"!`);
                     }
@@ -502,16 +646,17 @@
         }
 
         function updateStats() {
+            const currentStats = petMemories[currentPet];
             document.getElementById('happiness').textContent = happiness;
-            document.getElementById('intelligence').textContent = intelligence;
-            document.getElementById('experience').textContent = experience;
-            document.getElementById('letters-eaten').textContent = lettersEaten;
+            document.getElementById('intelligence').textContent = currentStats.intelligence;
+            document.getElementById('experience').textContent = currentStats.experience;
+            document.getElementById('letters-eaten').textContent = currentStats.knownLetters.size;
             document.getElementById('money').textContent = money.toFixed(2);
             document.getElementById('income').textContent = income;
             document.getElementById('extra-letters').textContent = extraLetters;
             
             const lettersLearnedDiv = document.getElementById('letters-learned');
-            lettersLearnedDiv.innerHTML = Array.from(knownLetters)
+            lettersLearnedDiv.innerHTML = Array.from(currentStats.knownLetters)
                 .sort()
                 .map(letter => premiumLetters.has(letter) ? 
                     `<span class="premium-letter">${letter}</span>` : letter)
@@ -538,14 +683,17 @@
             const shop = document.getElementById('letter-shop');
             shop.innerHTML = '<h3>Letter Shop</h3>';
             
-            premiumLetters.forEach(letter => {
+            const currentStats = petMemories[currentPet];
+            const petStats = petLetterStats[currentPet];
+            
+            petStats.freeLetters.forEach(letter => {
                 const item = document.createElement('div');
-                item.className = `shop-item ${money >= 10 ? '' : 'locked'}`;
+                item.className = `shop-item ${money >= petStats.prices[letter] ? '' : 'locked'}`;
                 item.innerHTML = `
                     <div style="font-size: 24px;">${letter}</div>
-                    <div>$10.00</div>
+                    <div>$0.00</div>
                 `;
-                if (money >= 10) {
+                if (money >= petStats.prices[letter]) {
                     item.onclick = () => {
                         foodInput.value = letter;
                         feedPet();
