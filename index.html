@@ -345,7 +345,8 @@
 
             if (letter) {
                 if (premiumLetters.has(letter) && money < 10) {
-                    showNotification('This letter costs $10!', '#e94560');
+                    showNotification(`Letter "${letter}" costs $10! Check the Letter Shop`, '#e94560');
+                    foodInput.value = '';  // Clear input
                     return;
                 }
 
@@ -385,7 +386,12 @@
             const availableJobs = jobs.filter(job => job.minIntelligence <= intelligence);
             
             if (availableJobs.length === 0) {
-                showNotification('Need more intelligence to get a job!', '#e94560');
+                const nextJob = jobs.find(job => job.minIntelligence > intelligence);
+                if (nextJob) {
+                    showNotification(`Need ${nextJob.minIntelligence} intelligence for next job: ${nextJob.title}`, '#e94560');
+                } else {
+                    showNotification('Need more intelligence to get a job!', '#e94560');
+                }
                 return;
             }
 
@@ -395,13 +401,16 @@
                 if (!currentJob || currentJob.income < newJob.income) {
                     currentJob = newJob;
                     income = newJob.income;
-                    showNotification(`Got a job: ${newJob.title}!`);
+                    showNotification(`Got a job: ${newJob.title}! Income: $${newJob.income}/sec`, '#4CAF50');
                     updateJobStatus();
                 } else {
-                    showNotification('No better jobs available right now');
+                    showNotification(`Already have the best job for your intelligence (${intelligence})`, '#e94560');
                 }
             } else {
-                showNotification('No luck finding a job. Try again!', '#e94560');
+                const failReason = happiness < 50 ? 
+                    "Try increasing happiness!" : 
+                    "Try increasing intelligence!";
+                showNotification(`No luck finding a job. ${failReason}`, '#e94560');
             }
         }
 
