@@ -115,37 +115,141 @@
         .premium-letter {
             color: #ffd700;
         }
+
+        #top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #162447;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        #pets-bar {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 5px;
+            max-width: 70%;
+        }
+
+        .pet-icon {
+            font-size: 24px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s;
+            background-color: #1f4068;
+        }
+
+        .pet-icon.active {
+            opacity: 1;
+            transform: scale(1.1);
+            background-color: #e94560;
+        }
+
+        #total-cash {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffd700;
+            padding: 10px;
+        }
+
+        .shop-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 15px;
+            background-color: #1f4068;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .shop-item {
+            background-color: #162447;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .shop-item:hover {
+            transform: scale(1.05);
+        }
+
+        .shop-item.locked {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        #main-content {
+            margin-top: 80px;
+        }
+
+        /* Pet-specific backgrounds */
+        .theme-bear { background-color: #1a1a2e; }
+        .theme-robot { background-color: #2a1a3a; }
+        .theme-dragon { background-color: #3a1a2a; }
+        .theme-alien { background-color: #1a3a2a; }
     </style>
 </head>
 
 <body>
-    <div id="game-container">
-        <h1>Letter Pet Career</h1>
-        <div id="pet-container">ʕ•ᴥ•ʔ</div>
-        
-        <div class="stats-grid">
-            <div class="stat-box">
-                <h3>Basic Stats</h3>
-                <p>Happiness: <span id="happiness">50</span>%</p>
-                <p>Intelligence: <span id="intelligence">10</span></p>
-                <p>Experience: <span id="experience">0</span></p>
-            </div>
-            <div class="stat-box">
-                <h3>Career Stats</h3>
-                <p>Letters Known: <span id="letters-eaten">0</span></p>
-                <p>Money: $<span id="money">0</span></p>
-                <p>Income: $<span id="income">0</span>/sec</p>
-            </div>
+    <div id="top-bar">
+        <div id="pets-bar">
+            <div class="pet-icon active" onclick="switchPet('bear')">ʕ•ᴥ•ʔ</div>
         </div>
+        <div id="total-cash">$0.00</div>
+    </div>
 
-        <div id="letters-learned"></div>
-        
-        <div id="job-status"></div>
+    <div id="main-content">
+        <div id="game-container">
+            <h1>Letter Pet Career</h1>
+            <div id="pet-container">ʕ•ᴥ•ʔ</div>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h3>Basic Stats</h3>
+                    <p>Happiness: <span id="happiness">50</span>%</p>
+                    <p>Intelligence: <span id="intelligence">10</span></p>
+                    <p>Experience: <span id="experience">0</span></p>
+                </div>
+                <div class="stat-box">
+                    <h3>Career Stats</h3>
+                    <p>Letters Known: <span id="letters-eaten">0</span></p>
+                    <p>Money: $<span id="money">0</span></p>
+                    <p>Income: $<span id="income">0</span>/sec</p>
+                </div>
+            </div>
 
-        <div id="input-area">
-            <input type="text" id="food" maxlength="1" placeholder="Type a letter">
-            <button onclick="feedPet()">Feed</button>
-            <button id="job-button" onclick="searchJob()">Search for Job</button>
+            <div id="letters-learned"></div>
+            
+            <div id="job-status"></div>
+
+            <div class="shop-container" id="letter-shop">
+                <h3>Letter Shop</h3>
+                <!-- Will be populated by JavaScript -->
+            </div>
+
+            <div class="shop-container" id="pet-shop">
+                <h3>Pet Shop</h3>
+                <!-- Will be populated by JavaScript -->
+            </div>
+
+            <div id="input-area">
+                <input type="text" id="food" maxlength="1" placeholder="Type a letter">
+                <button onclick="feedPet()">Feed</button>
+                <button id="job-button" onclick="searchJob()">Search for Job</button>
+                <button onclick="toggleShop('letter-shop')">Letter Shop</button>
+                <button onclick="toggleShop('pet-shop')">Pet Shop</button>
+            </div>
         </div>
     </div>
 
@@ -188,6 +292,44 @@
             { title: "Chief Linguist", minIntelligence: 100, income: 12 }
         ];
 
+        const availablePets = {
+            bear: {
+                icon: 'ʕ•ᴥ•ʔ',
+                price: 0,
+                happy: 'ʕ•ᴗ•ʔ',
+                neutral: 'ʕ•ᴥ•ʔ',
+                sad: 'ʕ•︵•ʔ',
+                eating: 'ʕ○ᴥ○ʔ'
+            },
+            robot: {
+                icon: '[◉‿◉]',
+                price: 100,
+                happy: '[^‿^]',
+                neutral: '[◉‿◉]',
+                sad: '[×︵×]',
+                eating: '[○‿○]'
+            },
+            dragon: {
+                icon: '🐲',
+                price: 250,
+                happy: '🐲',
+                neutral: '🐲',
+                sad: '🐲',
+                eating: '🐲'
+            },
+            alien: {
+                icon: '👽',
+                price: 500,
+                happy: '👽',
+                neutral: '👽',
+                sad: '👽',
+                eating: '👽'
+            }
+        };
+
+        let currentPet = 'bear';
+        let ownedPets = new Set(['bear']);
+
         function showNotification(message, color = '#4CAF50') {
             const notification = document.getElementById('notification');
             notification.style.backgroundColor = color;
@@ -229,9 +371,9 @@
                 }
 
                 // Show eating animation
-                petContainer.textContent = 'ʕ○ᴥ○ʔ';
+                petContainer.textContent = availablePets[currentPet].eating;
                 setTimeout(() => {
-                    petContainer.textContent = pet;
+                    updatePetDisplay();
                 }, 500);
 
                 updateStats();
@@ -288,6 +430,97 @@
                 .map(letter => premiumLetters.has(letter) ? 
                     `<span class="premium-letter">${letter}</span>` : letter)
                 .join(' ');
+            document.getElementById('total-cash').textContent = `$${money.toFixed(2)}`;
+            updateLetterShop();
+            updatePetShop();
+        }
+
+        function toggleShop(shopId) {
+            const shop = document.getElementById(shopId);
+            shop.style.display = shop.style.display === 'none' ? 'grid' : 'none';
+        }
+
+        function updateLetterShop() {
+            const shop = document.getElementById('letter-shop');
+            shop.innerHTML = '<h3>Letter Shop</h3>';
+            
+            premiumLetters.forEach(letter => {
+                const item = document.createElement('div');
+                item.className = `shop-item ${money >= 10 ? '' : 'locked'}`;
+                item.innerHTML = `
+                    <div style="font-size: 24px;">${letter}</div>
+                    <div>$10.00</div>
+                `;
+                if (money >= 10) {
+                    item.onclick = () => {
+                        foodInput.value = letter;
+                        feedPet();
+                    };
+                }
+                shop.appendChild(item);
+            });
+        }
+
+        function updatePetShop() {
+            const shop = document.getElementById('pet-shop');
+            shop.innerHTML = '<h3>Pet Shop</h3>';
+            
+            Object.entries(availablePets).forEach(([petId, pet]) => {
+                if (!ownedPets.has(petId) && pet.price > 0) {
+                    const item = document.createElement('div');
+                    item.className = `shop-item ${money >= pet.price ? '' : 'locked'}`;
+                    item.innerHTML = `
+                        <div style="font-size: 32px;">${pet.icon}</div>
+                        <div>$${pet.price.toFixed(2)}</div>
+                    `;
+                    if (money >= pet.price) {
+                        item.onclick = () => buyPet(petId);
+                    }
+                    shop.appendChild(item);
+                }
+            });
+        }
+
+        function buyPet(petId) {
+            const pet = availablePets[petId];
+            if (money >= pet.price && !ownedPets.has(petId)) {
+                money -= pet.price;
+                ownedPets.add(petId);
+                updatePetsBar();
+                updateStats();
+                showNotification(`Bought new pet: ${pet.icon}!`);
+            }
+        }
+
+        function updatePetsBar() {
+            const petsBar = document.getElementById('pets-bar');
+            petsBar.innerHTML = '';
+            ownedPets.forEach(petId => {
+                const petDiv = document.createElement('div');
+                petDiv.className = `pet-icon ${petId === currentPet ? 'active' : ''}`;
+                petDiv.onclick = () => switchPet(petId);
+                petDiv.textContent = availablePets[petId].icon;
+                petsBar.appendChild(petDiv);
+            });
+        }
+
+        function switchPet(petId) {
+            currentPet = petId;
+            document.body.className = `theme-${petId}`;
+            updatePetsBar();
+            updatePetDisplay();
+        }
+
+        function updatePetDisplay() {
+            const petData = availablePets[currentPet];
+            if (happiness < 30) {
+                pet = petData.sad;
+            } else if (happiness < 70) {
+                pet = petData.neutral;
+            } else {
+                pet = petData.happy;
+            }
+            petContainer.textContent = pet;
         }
 
         // Make pet sad over time
@@ -321,6 +554,15 @@
 
         // Initial update
         updateStats();
+
+        // Initialize shops
+        updateLetterShop();
+        updatePetShop();
+        document.getElementById('letter-shop').style.display = 'none';
+        document.getElementById('pet-shop').style.display = 'none';
+
+        // Initialize first pet
+        switchPet('bear');
     </script>
 </body>
 
