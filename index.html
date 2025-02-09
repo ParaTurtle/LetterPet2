@@ -1,16 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letter Pet</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+        }
+
+        #pet-container {
+            font-size: 48px;
+            margin: 20px;
+        }
+
+        #stats {
+            margin: 20px;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+
+        #input-area {
+            margin: 20px;
+        }
+
+        input {
+            padding: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 
 <body>
-  Hello world
-  <script src="script.js"></script>
+    <h1>Feed Your Letter Pet!</h1>
+    <div id="pet-container">ʕ•ᴥ•ʔ</div>
+    <div id="stats">
+        <p>Happiness: <span id="happiness">50</span>%</p>
+        <p>Letters eaten: <span id="letters-eaten">0</span></p>
+    </div>
+    <div id="input-area">
+        <input type="text" id="food" maxlength="1" placeholder="Type a letter">
+        <button onclick="feedPet()">Feed</button>
+    </div>
+
+    <script>
+        let happiness = 50;
+        let lettersEaten = 0;
+        let pet = 'ʕ•ᴥ•ʔ';
+        const petContainer = document.getElementById('pet-container');
+
+        function feedPet() {
+            const foodInput = document.getElementById('food');
+            const letter = foodInput.value.trim();
+
+            if (letter) {
+                lettersEaten++;
+                happiness = Math.min(100, happiness + 10);
+
+                // Show eating animation
+                petContainer.textContent = 'ʕ○ᴥ○ʔ';
+                setTimeout(() => {
+                    petContainer.textContent = pet;
+                }, 500);
+
+                updateStats();
+                foodInput.value = '';
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('happiness').textContent = happiness;
+            document.getElementById('letters-eaten').textContent = lettersEaten;
+        }
+
+        // Make pet sad over time
+        setInterval(() => {
+            happiness = Math.max(0, happiness - 5);
+            if (happiness < 30) {
+                pet = 'ʕ•︵•ʔ';
+            } else if (happiness < 70) {
+                pet = 'ʕ•ᴥ•ʔ';
+            } else {
+                pet = 'ʕ•ᴗ•ʔ';
+            }
+            petContainer.textContent = pet;
+            updateStats();
+        }, 10000);
+    </script>
 </body>
 
 </html>
