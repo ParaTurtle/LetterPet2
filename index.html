@@ -198,6 +198,76 @@
         .theme-robot { background-color: #2a1a3a; }
         .theme-dragon { background-color: #3a1a2a; }
         .theme-alien { background-color: #1a3a2a; }
+
+        .notification-container {
+            position: fixed;
+            top: 60px; /* Below top bar */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .notification-message {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            animation: slideDown 0.3s ease-out, fadeOut 0.3s ease-out 2.7s;
+            pointer-events: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        #game-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            max-width: 1200px;
+            width: 95%;
+            margin: 80px auto 0;
+        }
+
+        #left-panel {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        #right-panel {
+            padding-bottom: 100px;
+        }
+
+        #control-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #162447;
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .stat-box {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 
@@ -209,48 +279,48 @@
         <div id="total-cash">$0.00</div>
     </div>
 
-    <div id="main-content">
-        <div id="game-container">
-            <h1>Letter Pet Career</h1>
-            <div id="pet-container">ʕ•ᴥ•ʔ</div>
-            
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <h3>Basic Stats</h3>
-                    <p>Happiness: <span id="happiness">50</span>%</p>
-                    <p>Intelligence: <span id="intelligence">10</span></p>
-                    <p>Experience: <span id="experience">0</span></p>
-                </div>
-                <div class="stat-box">
-                    <h3>Career Stats</h3>
-                    <p>Letters Known: <span id="letters-eaten">0</span></p>
-                    <p>Money: $<span id="money">0</span></p>
-                    <p>Income: $<span id="income">0</span>/sec</p>
-                </div>
+    <div class="notification-container" id="notification-container"></div>
+
+    <div id="game-layout">
+        <div id="left-panel">
+            <div class="stat-box">
+                <h3>Basic Stats</h3>
+                <p>Happiness: <span id="happiness">50</span>%</p>
+                <p>Intelligence: <span id="intelligence">10</span></p>
+                <p>Experience: <span id="experience">0</span></p>
             </div>
 
+            <div class="stat-box">
+                <h3>Career Stats</h3>
+                <p>Letters Known: <span id="letters-eaten">0</span></p>
+                <p>Extra Letters Fed: <span id="extra-letters">0</span></p>
+                <p>Money: $<span id="money">0</span></p>
+                <p>Income: $<span id="income">0</span>/sec</p>
+            </div>
+
+            <div id="job-status"></div>
+        </div>
+
+        <div id="right-panel">
+            <div id="pet-container">ʕ•ᴥ•ʔ</div>
             <div id="letters-learned"></div>
             
-            <div id="job-status"></div>
-
             <div class="shop-container" id="letter-shop">
                 <h3>Letter Shop</h3>
-                <!-- Will be populated by JavaScript -->
             </div>
 
             <div class="shop-container" id="pet-shop">
                 <h3>Pet Shop</h3>
-                <!-- Will be populated by JavaScript -->
-            </div>
-
-            <div id="input-area">
-                <input type="text" id="food" maxlength="1" placeholder="Type a letter">
-                <button onclick="feedPet()">Feed</button>
-                <button id="job-button" onclick="searchJob()">Search for Job</button>
-                <button onclick="toggleShop('letter-shop')">Letter Shop</button>
-                <button onclick="toggleShop('pet-shop')">Pet Shop</button>
             </div>
         </div>
+    </div>
+
+    <div id="control-panel">
+        <input type="text" id="food" maxlength="1" placeholder="Type a letter">
+        <button onclick="feedPet()">Feed</button>
+        <button id="job-button" onclick="searchJob()">Search for Job</button>
+        <button onclick="toggleShop('letter-shop')">Letter Shop</button>
+        <button onclick="toggleShop('pet-shop')">Pet Shop</button>
     </div>
 
     <div class="notification" id="notification"></div>
@@ -265,6 +335,7 @@
         let pet = 'ʕ•ᴥ•ʔ';
         let knownLetters = new Set();
         let currentJob = null;
+        let extraLetters = 0;
         
         const petContainer = document.getElementById('pet-container');
         const foodInput = document.getElementById('food');
@@ -331,12 +402,15 @@
         let ownedPets = new Set(['bear']);
 
         function showNotification(message, color = '#4CAF50') {
-            const notification = document.getElementById('notification');
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = 'notification-message';
             notification.style.backgroundColor = color;
             notification.textContent = message;
-            notification.style.display = 'block';
+            container.appendChild(notification);
+            
             setTimeout(() => {
-                notification.style.display = 'none';
+                notification.remove();
             }, 3000);
         }
 
@@ -368,7 +442,9 @@
                         showNotification(`Learned "${letter}"!`);
                     }
                 } else {
-                    showNotification('Already knows this letter!', '#e94560');
+                    extraLetters++;
+                    happiness = Math.min(100, happiness + 1);
+                    showNotification(`Fed extra letter "${letter}"! +1 Happiness`);
                 }
 
                 // Show eating animation
@@ -432,6 +508,7 @@
             document.getElementById('letters-eaten').textContent = lettersEaten;
             document.getElementById('money').textContent = money.toFixed(2);
             document.getElementById('income').textContent = income;
+            document.getElementById('extra-letters').textContent = extraLetters;
             
             const lettersLearnedDiv = document.getElementById('letters-learned');
             lettersLearnedDiv.innerHTML = Array.from(knownLetters)
@@ -446,7 +523,15 @@
 
         function toggleShop(shopId) {
             const shop = document.getElementById(shopId);
-            shop.style.display = shop.style.display === 'none' ? 'grid' : 'none';
+            const otherShopId = shopId === 'letter-shop' ? 'pet-shop' : 'letter-shop';
+            const otherShop = document.getElementById(otherShopId);
+            
+            if (shop.style.display === 'none') {
+                otherShop.style.display = 'none';
+                shop.style.display = 'grid';
+            } else {
+                shop.style.display = 'none';
+            }
         }
 
         function updateLetterShop() {
