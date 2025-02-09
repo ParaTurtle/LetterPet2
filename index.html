@@ -321,21 +321,16 @@
         <button id="job-button" onclick="searchJob()">Search for Job</button>
         <button onclick="toggleShop('letter-shop')">Letter Shop</button>
         <button onclick="toggleShop('pet-shop')">Pet Shop</button>
-        <button onclick="study()" style="background-color: #9c27b0;">Study ($${Math.floor(petMemories[currentPet].intelligence * 0.5)})</button>
+        <button onclick="study()" style="background-color: #9c27b0;">Study</button>
     </div>
 
     <div class="notification" id="notification"></div>
 
     <script>
         let happiness = 50;
-        let intelligence = 10;
-        let experience = 0;
-        let lettersEaten = 0;
         let money = 0;
         let income = 0;
         let pet = 'ʕ•ᴥ•ʔ';
-        let knownLetters = new Set();
-        let currentJob = null;
         let extraLetters = 0;
         
         const petContainer = document.getElementById('pet-container');
@@ -603,10 +598,11 @@
         }
 
         function searchJob() {
-            const availableJobs = jobs.filter(job => job.minIntelligence <= intelligence);
+            const currentStats = petMemories[currentPet];
+            const availableJobs = jobs.filter(job => job.minIntelligence <= currentStats.intelligence);
             
             if (availableJobs.length === 0) {
-                const nextJob = jobs.find(job => job.minIntelligence > intelligence);
+                const nextJob = jobs.find(job => job.minIntelligence > currentStats.intelligence);
                 if (nextJob) {
                     showNotification(`Need ${nextJob.minIntelligence} intelligence for next job: ${nextJob.title}`, '#e94560');
                 } else {
@@ -615,16 +611,16 @@
                 return;
             }
 
-            const jobChance = (happiness + intelligence) / 200; // 0 to 1
+            const jobChance = (happiness + currentStats.intelligence) / 200; // 0 to 1
             if (Math.random() < jobChance) {
                 const newJob = availableJobs[availableJobs.length - 1];
-                if (!currentJob || currentJob.income < newJob.income) {
-                    currentJob = newJob;
+                if (!currentStats.currentJob || currentStats.currentJob.income < newJob.income) {
+                    currentStats.currentJob = newJob;
                     income = newJob.income;
                     showNotification(`Got a job: ${newJob.title}! Income: $${newJob.income}/sec`, '#4CAF50');
                     updateJobStatus();
                 } else {
-                    showNotification(`Already have the best job for your intelligence (${intelligence})`, '#e94560');
+                    showNotification(`Already have the best job for your intelligence (${currentStats.intelligence})`, '#e94560');
                 }
             } else {
                 const failReason = happiness < 50 ? 
@@ -636,12 +632,15 @@
 
         function updateJobStatus() {
             const jobStatus = document.getElementById('job-status');
-            if (currentJob) {
+            const currentStats = petMemories[currentPet];
+            if (currentStats.currentJob) {
                 jobStatus.style.display = 'block';
                 jobStatus.innerHTML = `
-                    <h3>Current Job: ${currentJob.title}</h3>
-                    <p>Income: $${currentJob.income}/sec</p>
+                    <h3>Current Job: ${currentStats.currentJob.title}</h3>
+                    <p>Income: $${currentStats.currentJob.income}/sec</p>
                 `;
+            } else {
+                jobStatus.style.display = 'none';
             }
         }
 
@@ -664,6 +663,8 @@
             document.getElementById('total-cash').textContent = `$${money.toFixed(2)}`;
             updateLetterShop();
             updatePetShop();
+            updateStudyButton();
+            updateJobStatus();
         }
 
         function toggleShop(shopId) {
@@ -751,6 +752,7 @@
             document.body.className = `theme-${petId}`;
             updatePetsBar();
             updatePetDisplay();
+            updateStats();
         }
 
         function updatePetDisplay() {
@@ -805,6 +807,13 @@
 
         // Initialize first pet
         switchPet('bear');
+
+        function updateStudyButton() {
+            const studyButton = document.querySelector('button[onclick="study()"]');
+            const currentStats = petMemories[currentPet];
+            const studyCost = Math.floor(currentStats.intelligence * 0.5);
+            studyButton.textContent = `Study ($${studyCost})`;
+        }
     </script>
 </body>
 
